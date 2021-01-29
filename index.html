@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Basic Snake HTML Game</title>
+  <meta charset="UTF-8">
+  <style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background-image: url(Img/Snake.png); 
+	background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    border: 1px solid black;
+	background-color: green;
+  }
+  </style>
+</head>
+<body>
+<img id="GameOver" src="Img/GameOverScreen.jpg" alt="y" style="display: none;">
+<canvas width="400" height="400" id="game"></canvas>
+<script>
+var canvas = document.getElementById('game');
+var context = canvas.getContext('2d');
+
+var grid = 16;
+var count = 0;
+var score = 0;
+var restart1 = false;
+var snake = {
+  x: 160,
+  y: 160,
+  
+
+
+
+
+  // Die Rasterlänge wird in x- oder y-Richtung bewegegt nach jedem Frame
+  dx: grid,
+  dy: 0,
+
+  // Alle Raster die der Schlangenkörper einnimmt wird beobachtet
+  cells: [],
+
+  // Schlange wächst nach jedem gegessenen Apfel um ein Kästchen (Rastergröße)
+  maxCells: 4
+};
+var apple = {
+  x: 320,
+  y: 320
+};
+
+// Es wird eine zufällige Zahl in einem definierten Zahlenbereich ausgeworfen
+//Zahlenbereich erstreckt sich von -254(min) bis 255(max)
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+// Spielschleife
+function loop() {
+  requestAnimationFrame(loop);
+
+  // Anzahl der Frames per Second (FPS) veränderbar (empfohlen zwischen 6-15 FPS)
+  if (++count < 8) {
+    return;
+  }
+
+  count = 0;
+  context.clearRect(0,0,canvas.width,canvas.height);
+
+  // Bewegt die Schlange in ihrer Definierten GEschwindigkeit
+  snake.x += snake.dx;
+  snake.y += snake.dy;
+
+  
+  if (snake.x < 0) {
+    snake.x = canvas.width - grid;
+  }
+  else if (snake.x >= canvas.width) {
+    snake.x = 0;
+  }
+
+ 
+  if (snake.y < 0) {
+    snake.y = canvas.height - grid;
+  }
+  else if (snake.y >= canvas.height) {
+    snake.y = 0;
+  }
+
+ 
+  snake.cells.unshift({x: snake.x, y: snake.y});
+
+ 
+  if (snake.cells.length > snake.maxCells) {
+    snake.cells.pop();
+  }
+
+  // draw apple
+  context.fillStyle = 'red';
+  context.fillRect(apple.x, apple.y, grid-1, grid-1);
+
+	context.font = "bold 25pt";
+	context.fillStyle = 'white';	
+	context.fillText("Score:  " + score,  canvas.width /2, 10);
+  
+  context.fillStyle = 'blue';
+  snake.cells.forEach(function(cell, index) {
+
+    
+    context.fillRect(cell.x, cell.y, grid-1, grid-1);
+	
+	
+
+    // Schlange ist Apfel
+    if (cell.x === apple.x && cell.y === apple.y) {
+      snake.maxCells++;
+	  
+	  score = score + 1;
+	  
+
+    //Canvasgröße ist 400x400 Pixel / 25x25 Grid
+      apple.x = getRandomInt(0, 25) * grid;
+      apple.y = getRandomInt(0, 25) * grid;
+    }
+
+    // check collision with all cells after this one (modified bubble sort)
+    for (var i = index + 1; i < snake.cells.length; i++) {
+	
+	
+
+      // snake occupies same space as a body part. reset game
+	  
+      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+        
+		snake.x = 160;
+        snake.y = 160;
+        snake.cells = [];
+        snake.maxCells = 4;
+        snake.dx = grid;
+        snake.dy = 0;
+		
+        apple.x = getRandomInt(0, 25) * grid;
+        apple.y = getRandomInt(0, 25) * grid;
+		
+		score = 0;
+		
+		
+      }
+    }
+  });
+}
+
+
+document.addEventListener('keydown', function(e) {
+ 
+	
+  // Pfeiltaste nach Links
+  if (e.which === 37 && snake.dx === 0) {
+    snake.dx = -grid;
+    snake.dy = 0;
+  }
+  // Pfeiltaste nach Oben
+  else if (e.which === 38 && snake.dy === 0) {
+    snake.dy = -grid;
+    snake.dx = 0;
+  }
+  // Pfeiltaste nach Rechts
+  else if (e.which === 39 && snake.dx === 0) {
+    snake.dx = grid;
+    snake.dy = 0;
+  }
+  // Pfeiltaste nach Unten 
+  else if (e.which === 40 && snake.dy === 0) {
+    snake.dy = grid;
+    snake.dx = 0;
+	
+  }
+  
+  
+  });
+
+
+
+// start the game
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
